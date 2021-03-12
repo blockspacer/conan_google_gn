@@ -1,0 +1,49 @@
+config("headers") {
+  visibility = [ ":link_python" ]
+
+  include_dirs = [
+    "hpp",
+  ]
+}
+
+python_output_dir = "${root_build_dir}/lib"
+
+group("link_python_runtime_config") {
+  metadata = {
+    envvars = [
+      "name=\"PYTHONPATH\",op=\"prepend\",value=\"/" + rebase_path("${python_output_dir}/python2.7", "/") + "\"",
+    ]
+  }
+}
+
+action_foreach("copy_python_module") {
+  script = "//basic-config/utils/cp.py"
+
+  sources = [
+    "python2.7/dummy/__init__.py",
+  ]
+
+  outputs = [ "${python_output_dir}/{{source_target_relative}}" ]
+
+  args = [
+    "--debug",
+    "{{source}}",
+    rebase_path("${python_output_dir}", root_build_dir) + "/{{source_target_relative}}",
+  ]
+}
+
+shared_library("link_python") {
+  sources = [
+    "src/bridge.cpp",
+    "src/internals.cpp",
+  ]
+
+  public_deps = [
+    "//thirdparty/libs/python:python27",
+    ":link_python_runtime_config",
+  ]
+
+  public_configs = [
+    ":headers"
+  ]
+}

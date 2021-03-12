@@ -1,0 +1,17 @@
+import("//basic-config/utils/unittest/unittest.gni")
+
+group("test3_config") {
+  testonly = true
+  public_deps = [
+    "//examples/lib/link_against/python:link_python",
+    "//examples/lib/link_against/java:link_java",
+    "//thirdparty/libs/googletest:gtest_main"
+  ]
+}
+
+unittest("test3") {
+  sources = [
+    "test3.cpp",
+  ]
+  deps = [ ":test3_config" ]
+}

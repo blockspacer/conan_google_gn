@@ -1,0 +1,21 @@
+declare_args() {
+  # Set this to a clang build directory. If set, that clang is used as compiler.
+  # On Windows, setting this also causes lld-link to be used as linker.
+  # Example value: getenv("HOME") + "/src/llvm-build/Release+Asserts"
+  clang_base_path = ""
+
+  # Set this to GCC build directory. If set, that GCC is used as compiler.
+  # Example value: "/opt/rh/devtoolset-3/root/usr/bin"
+  gcc_base_path = ""
+}
+
+declare_args() {
+  # Set if the host compiler is clang.  On by default on Mac or if
+  # clang_base_path is set.
+  is_clang = host_os == "mac" || clang_base_path != ""
+
+  is_gcc = gcc_base_path != ""
+
+  # Set this to true to link with LLD instead of the default linker.
+  use_lld = clang_base_path != "" && host_os != "mac"
+}

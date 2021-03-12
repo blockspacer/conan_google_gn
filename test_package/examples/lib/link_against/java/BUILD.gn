@@ -1,0 +1,21 @@
+config("headers") {
+  visibility = [ ":link_java" ]
+
+  include_dirs = [
+    "hpp",
+  ]
+}
+
+shared_library("link_java") {
+  sources = [
+    "src/bridge.cpp",
+  ]
+
+  public_deps = [
+    "//thirdparty/libs/java:jdk8",
+  ]
+
+  public_configs = [
+    ":headers"
+  ]
+}

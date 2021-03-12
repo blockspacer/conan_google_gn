@@ -1,0 +1,7 @@
+[requires]
+googletest/a3c73ed28d7@gn/testing
+#gtest/1.8.1@bincrafters/stable
+GNGenerator/0.1@matthieu/testing
+
+[generators]
+GNGenerator

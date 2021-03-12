@@ -1,0 +1,129 @@
+# This file defines a template for adding a unittest binary.
+#
+# It's a thin wrapper around GN's built-in executable() target type and
+# accepts the same parameters, and in addition this paramater:
+#
+#   has_custom_main (optional)
+#       [bool] If set, link against gtest instead of UnitTestMain; for tests
+#              that define their own main() function.
+#
+# Example use:
+#
+#   unittest("FormatTest") {
+#     sources = [ ... ]
+#     ...
+#   }
+
+template("unittest") {
+  local_target_name = target_name
+
+  test_bin_dir = "${root_build_dir}/testing/bin"
+  #test_lib_dir = "${root_build_dir}/testing/lib"
+
+  group("global_runtime_path") {
+    metadata = {
+      envvars = [
+        "name=\"PATH\",op=\"prepend\",value=\"/" + rebase_path("${root_build_dir}/bin", "/") + "\"",
+        "name=\"LD_LIBRARY_PATH\",op=\"prepend\",value=\"/" + rebase_path("${root_build_dir}/lib", "/") + "\"",
+      ]
+    }
+  }
+
+  executable("_" + target_name) {
+    has_custom_main = false  # Default value.
+
+    # Foward everything (has_custom_main if set; configs, sources, deps, ...).
+    forward_variables_from(invoker, "*", ["is_standalone"])
+    assert(!defined(invoker.output_dir), "cannot set unittest output_dir")
+    assert(!defined(invoker.testonly), "cannot set unittest testonly")
+
+    # Common settings for all unit tests.
+    # Unit test binaries shouldn't go right in out/gn/bin, for two reasons:
+    # 1. That's where production binaries go.
+    # 2. The CMake build doesn't put the unit tests of all projects (clang,
+    #    lld,...) in one directory, so it's not guaranteed that there won't
+    #    be name collisions between test binaries from separate projects.
+    # Each lit suite takes an foo_obj_root parameter and puts temporary files
+    # for lit tests at foo_obj_root/test and looks for unit test binaries
+    # below foo_obj_root/unittests. As long as the BUILD.gn files processing
+    # the lit.site.cfg.py.in files match the output dir here, it doesn't
+    # matter all that much where the unit test binaries go, with the weak
+    # constraints that test binaries of different projects should go in
+    # different folders, and that it's not too difficult to manually
+    # run the unit test binary if necessary. Using target_out_dir here
+    # means that //clang/unittests/Format gets its binary in
+    # out/gn/obj/clang/unittests/Format/FormatTests, which seems fine.
+    #
+    # If you change output_dir here, look through
+    # `git grep target_out_dir '*/unittests/*'` and update those too.
+    output_dir = test_bin_dir
+
+    if (!defined(invoker.deps)) {
+      deps = []
+    }
+    if (has_custom_main) {
+      deps += [ "//thirdparty/libs/googletest:gtest" ]
+    } else {
+      deps += [ "//thirdparty/libs/googletest:gtest_main" ]
+    }
+
+    testonly = true
+  }
+
+  generated_file("_${target_name}_env_metadata") {
+    testonly = true
+
+    forward_variables_from(invoker, [ "is_standalone", "deps" ])
+    if (defined(invoker.is_standalone)) {
+      is_standalone = invoker.is_standalone
+    } else {
+      is_standalone = false
+    }
+
+    outputs = [ "${target_gen_dir}/${local_target_name}_env.op" ]
+    data_keys = [ "envvars" ]
+    if (!is_standalone) {
+      deps += [
+        ":global_runtime_path",
+      ]
+    }
+  }
+
+  action("_${target_name}_wrapper") {
+    testonly = true
+
+    output_dir = test_bin_dir
+
+    sources = [ "${target_gen_dir}/${local_target_name}_env.op" ]
+    outputs = [ "${output_dir}/${local_target_name}.sh" ]
+
+    script = "//basic-config/utils/generate_wrapper.py"
+    args = [
+      "--debug",
+      "--language", "bash",
+      "--env-ops", rebase_path(sources[0], root_build_dir),
+      "--output", rebase_path(outputs[0], root_build_dir),
+    ]
+
+    deps = [ ":_${local_target_name}_env_metadata" ]
+  }
+
+  action(target_name) {
+    testonly = true
+
+    deps = [
+      ":_${local_target_name}",
+      ":_${local_target_name}_wrapper",
+    ]
+
+    script = "//basic-config/utils/dummy_executor.py"
+    args = [
+      rebase_path(test_bin_dir, root_build_dir) + "/${local_target_name}.sh",
+      rebase_path(test_bin_dir, root_build_dir) + "/_${local_target_name}",
+    ]
+
+    outputs = ["${target_gen_dir}/force-run"]
+
+    pool = "//:console"
+  }
+}

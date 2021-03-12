@@ -1,0 +1,45 @@
+#if (current_os == "win") {
+#    config("windows10_config") {
+#        visibility = [ ":machine_resources" ]
+#        java_root = "C:/jdk1.8.0_131-x64"
+#        python27_root = "C:/Python27"
+#        python3_root = "C:/Program Files/Python36"
+#    }
+#
+#    group("machine_resources") {
+#      public_configs = [
+#        ":windows10_config",
+#      ]
+#    }
+#
+#} else {
+#    config("ubuntu_config") {
+#        visibility = [ ":machine_resources" ]
+#        java_root = "/usr/lib/jvm/java-1.8.0-openjdk-amd64"
+#        python27_root = "/usr"
+#        python3_root = "/usr"
+#    }
+#
+#    config("rhel64_config") {
+#        visibility = [ ":machine_resources" ]
+#        java_root = "/usr/lib/jvm/java-1.8.0-openjdk-amd64"
+#        python27_root = "/opt/rh/python27/root/usr"
+#        python3_root = "/opt/rh/python36/root/usr"
+#    }
+#
+#    group("machine_resources") {
+#      public_configs = [
+#        ":ubuntu_config",
+#      ]
+#    }
+#}
+
+if (current_os == "linux") {
+    java8_root = "/usr/lib/jvm/java-1.8.0-openjdk-amd64"
+    python27_root = "/usr"
+    python3_root = "/usr"
+} else {
+    java8_root = "C:/jdk1.8.0_131-x64"
+    python27_root = "C:/Python27"
+    python3_root = "C:/Program Files/Python36"
+}

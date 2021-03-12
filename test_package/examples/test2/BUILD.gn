@@ -1,0 +1,11 @@
+import("//basic-config/utils/unittest/unittest.gni")
+
+unittest("test2") {
+  is_standalone = true
+  has_custom_main = true
+  sources = [ "test2.cpp" ]
+
+  cflags = [ "-Wall" ]
+  defines = [ "EVIL_BIT=1" ]
+  include_dirs = [ "." ]
+}

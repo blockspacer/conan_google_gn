@@ -1,0 +1,19 @@
+import("//local-config/installation_paths.gni")
+
+config("python27_config") {
+  visibility = [ ":python27" ]
+
+  if (current_os == "win") {
+    include_dirs = [ "${python27_root}/include" ]
+    libs = [ "${python27_root}/libs/python27.lib" ]
+
+  } else {
+    include_dirs = [ "${python27_root}/include/python2.7" ]
+    libs = [ "python2.7" ]
+    lib_dirs = [ "${python27_root}/lib" ]
+  }
+}
+
+group("python27") {
+  public_configs = [ ":python27_config" ]
+}

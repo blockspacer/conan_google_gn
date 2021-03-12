@@ -1,0 +1,15 @@
+import("//basic-config/utils/cyclic_dependencies/tools.gni")
+
+cyclic_deps_shared_library("c3") {
+  sources = [
+    "src/C.cc",
+  ]
+
+  include_dirs = [
+    "hpp",
+  ]
+
+  cyclic_deps = [
+    "//examples/cyclic_dependencies/3/a3",
+  ]
+}

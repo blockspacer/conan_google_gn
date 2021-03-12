@@ -1,0 +1,11 @@
+config("pthread_config") {
+  visibility = [ ":pthread" ]
+  cflags = [ "-pthread" ]
+  libs = [ "pthread" ]
+}
+
+group("pthread") {
+  if (current_os != "win") {
+    public_configs = [ ":pthread_config" ]
+  }
+}

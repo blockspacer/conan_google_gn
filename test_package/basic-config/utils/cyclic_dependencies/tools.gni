@@ -1,0 +1,42 @@
+template("cyclic_deps_shared_library") {
+    forward_variables_from(invoker, "*")
+    assert(defined(invoker.cyclic_deps), "You need to specify the list of cyclic dependencies")
+
+    target_public_config = "${target_name}_public_config"
+
+    config("_${target_public_config}") {
+        visibility = [ ":" + target_name, ":${target_public_config}" ]
+        include_dirs = []
+        include_dirs = invoker.include_dirs
+    }
+
+    group("${target_public_config}") {
+        public_configs = [ ":_${target_public_config}" ]
+    }
+
+    #print(invoker.cyclic_deps)
+
+    shared_library(target_name) {
+        configs -= [ "//basic-config:check_undefined_symbols" ]
+
+        # Add private dependencies on cyclic dependencies' headers
+        if (defined(invoker.deps)) {
+            deps = invoker.deps
+        } else {
+            deps = []
+        }
+        foreach(cyclic_dep, cyclic_deps) {
+            dep_name = get_label_info(cyclic_dep, "name")
+            deps += [ "${cyclic_dep}:${dep_name}_public_config" ]
+        }
+
+        # Add public dependencies on this library's headers
+        if (defined(invoker.public_configs)) {
+            public_configs = []
+            public_configs = invoker.public_configs
+            public_configs += [ ":_${target_public_config}" ]
+        } else {
+            public_configs = [ ":_${target_public_config}" ]
+        }
+    }
+}

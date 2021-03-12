@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+@ENV_SET@
+@ENV_PREPEND@
+@ENV_APPEND@
+@ENV_UNSET@
+
+@TEST_CMD@

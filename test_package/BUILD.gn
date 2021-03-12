@@ -1,0 +1,58 @@
+group("gn-examples") {
+  testonly = true
+  deps = [
+    #"//examples/test1",
+    "//examples/test2",
+    "//examples/test3",
+    "//examples/cyclic_dependencies/2:executable_with_2_cyclic_dependencies",
+    "//examples/cyclic_dependencies/3:executable_with_3_cyclic_dependencies",
+  ]
+}
+
+# This target should contain all dependencies of test.
+# //:default depends on it, so that ninja's default target builds all
+# prerequisites for check-lld but doesn't run check-lld itself.
+#group("_test") {
+#  deps = [
+#    ":lit_site_cfg",
+#    ":lit_unit_site_cfg",
+#    ":gn-examples"
+#  ]
+#  testonly = true
+#}
+#
+#action("test") {
+#  script = "$root_out_dir/bin/llvm-lit"
+#  if (host_os == "win") {
+#    script += ".py"
+#  }
+#  args = [
+#    "-sv",
+#    "--param",
+#    "lld_site_config=" + rebase_path(lld_lit_site_cfg_file, root_out_dir),
+#    "--param",
+#    "lld_unit_site_config=" +
+#        rebase_path(lld_lit_unit_site_cfg_file, root_out_dir),
+#    rebase_path(".", root_out_dir),
+#  ]
+#  outputs = [
+#    "$target_gen_dir/run-lit",  # Non-existing, so that ninja runs it each time.
+#  ]
+#
+#  # Since test is always dirty, //:default doesn't depend on it so that
+#  # it's not part of the default ninja target.  Hence, test shouldn't
+#  # have any deps except :test, so that the default target is sure to build
+#  # all the deps.
+#  deps = [
+#    ":_test",
+#  ]
+#  testonly = true
+#
+#  pool = "//:console"
+#}
+
+# A pool called "console" in the root BUILD.gn is magic and represents ninja's
+# built-in console pool. (Requires a GN with `gn --version` >= 552353.)
+pool("console") {
+  depth = 1
+}

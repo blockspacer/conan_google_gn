@@ -1,0 +1,29 @@
+group("gtest") {
+  testonly = true
+  public_deps = [
+    "//thirdparty/conan/googletest:include",
+    "//thirdparty/conan/googletest:gtest",
+    "//thirdparty/conan/googletest:runtime_path"
+  ]
+  if (current_os != "win") {
+    public_deps += [ "//thirdparty/libs/pthread:pthread" ]
+  }
+}
+
+group("gtest_main") {
+  testonly = true
+  public_deps = [ "//thirdparty/conan/googletest:gtest_main" ]
+  public_deps += [ ":gtest" ]
+}
+
+group("gmock") {
+  testonly = true
+  public_deps = [ ":gtest" ]
+  public_deps += [ "//thirdparty/conan/googletest:gmock" ]
+}
+
+group("gmock_main") {
+  testonly = true
+  public_deps = [ ":gmock" ]
+  public_deps += [ "//thirdparty/conan/googletest:gmock_main" ]
+}

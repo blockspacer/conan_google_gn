@@ -1,0 +1,49 @@
+import("//local-config/installation_paths.gni")
+
+config("jdk8_config") {
+  visibility = [ ":jdk8" ]
+
+  java_home = "${java8_root}"
+
+  include_dirs = [
+    "${java_home}/include"
+  ]
+
+  if (current_os == "win") {
+    include_dirs += [
+      "${java_home}/include/win32",
+    ]
+  } else {
+    include_dirs += [
+      "${java_home}/include/linux",
+    ]
+  }
+
+  if (current_os == "win") {
+    libs = [
+      "${java_home}/lib/jvm.lib",
+    ]
+  } else {
+    libs = [
+      "jvm",
+    ]
+    lib_dirs = [
+      "${java_home}/jre/lib/amd64/server",
+    ]
+  }
+}
+
+group("jdk8") {
+  public_configs = [
+    ":jdk8_config",
+  ]
+
+  java_home = "${java8_root}"
+
+  metadata = {
+    envvars = [
+      "name=\"JAVA_HOME\",op=\"set\",value=\"${java_home}\"",
+      "name=\"LD_LIBRARY_PATH\",op=\"prepend\",value=\"${java_home}/jre/lib/amd64/server\"",
+    ]
+  }
+}

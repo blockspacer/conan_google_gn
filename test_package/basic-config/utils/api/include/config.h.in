@@ -1,0 +1,31 @@
+#ifndef __@MODULE@_CONFIG_H__
+#define __@MODULE@_CONFIG_H__
+
+/* Symbols visibility control */
+#if defined(_WIN32) || defined(__CYGWIN__)
+  #if defined(@MODULE@_VISCTL)
+    #if defined(_MSC_VER)
+      #define @MODULE@_PUBLIC __declspec(dllexport)
+    #else
+      #define @MODULE@_PUBLIC __attribute__ ((dllexport))
+    #endif
+  #else
+    #if defined(_MSC_VER)
+      #define @MODULE@_PUBLIC __declspec(dllimport)
+    #else
+      #define @MODULE@_PUBLIC /*__attribute__ ((dllimport))*/
+    #endif
+  #endif
+  #define @MODULE@_LOCAL
+#else
+  #if defined(@MODULE@_VISCTL)
+    #define @MODULE@_PUBLIC __attribute__ ((visibility ("default")))
+    #define @MODULE@_LOCAL  __attribute__ ((visibility ("hidden")))
+  #else
+    #define @MODULE@_PUBLIC
+    #define @MODULE@_LOCAL
+  #endif
+#endif
+
+#endif /*__@MODULE@_CONFIG_H__*/
+

@@ -1,0 +1,6 @@
+import("//basic-config/utils/unittest/unittest.gni")
+
+unittest("test1") {
+  sources = [ "test1.cpp" ]
+  deps = []
+}
