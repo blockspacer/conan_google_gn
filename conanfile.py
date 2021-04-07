@@ -81,4 +81,4 @@ class GnConan(conan_build_helper.CMakePackage):
         self.cpp_info.bindirs = ["bin"]
         gn_executable = "gn.exe" if self.settings.os == "Windows" else "gn"
         self.env_info.GN_BIN = os.path.normpath(os.path.join(self.package_folder, "bin", gn_executable))
-    
+        self.user_info.GN_BIN = self.env_info.GN_BIN
